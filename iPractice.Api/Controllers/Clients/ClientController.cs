@@ -12,7 +12,7 @@ namespace iPractice.Api.Controllers.Clients;
 
 [ApiController]
 [Route("[controller]")]
-public class ClientController(IMediator mediator, IClientSqlRepository repository) : ControllerBase
+public class ClientController(IMediator mediator) : ControllerBase
 {
 
     [HttpPost]
@@ -33,15 +33,15 @@ public class ClientController(IMediator mediator, IClientSqlRepository repositor
     [HttpPost("{id}/bookings")]
     public async Task<ActionResult<Appointment>> BookAppointment([FromRoute] long id, [FromBody] CreateBookingDto data)
     {
-        var client = await repository.GetClientByIdAsync(id, default);
-        if (client == null)
+        try
         {
-            return NotFound($"Client with ID {id} not found");
+            var appointment = await mediator.Send(new BookAppointmentCommand(id, data.PsychologistId, data.AvailableTimeSlotId));
+            return Ok(appointment); 
         }
-
-        var appointment = await mediator.Send(new BookAppointmentCommand(id, data.PsychologistId, data.AvailableTimeSlotId));
-
-        return Ok(appointment); 
+        catch (System.Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     [HttpDelete("{id}/bookings/{appointmentId}")]

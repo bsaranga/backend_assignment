@@ -13,6 +13,7 @@ using iPractice.Api.PipelineBehaviors;
 using MediatR;
 using iPractice.Api.Validation;
 using iPractice.Api.UseCases.Psychologists;
+using iPractice.Api.UseCases.Clients;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,6 +35,7 @@ builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBeh
 builder.Services.AddTransient<IValidator<CreateNewAvailableTimeSlotCommand>, CreateTimeSlotValidator>();
 builder.Services.AddTransient<IValidator<UpdateAvailableTimeSlotCommand>, UpdateTimeSlotValidator>();
 builder.Services.AddTransient<IValidator<AssignNewClientCommand>, AssignNewClientValidator>();
+builder.Services.AddTransient<IValidator<BookAppointmentCommand>, BookAppointmentValidator>();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("Sqlite")));
