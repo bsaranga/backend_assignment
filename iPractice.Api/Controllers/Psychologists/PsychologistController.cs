@@ -43,8 +43,15 @@ public class PsychologistController(IMediator mediator) : ControllerBase
     [HttpPost("{id}/clients")]
     public async Task<ActionResult<PsychologistDetailsDto>> AssignNewClient([FromRoute] long id, [FromBody] ClientDto client)
     {
-        var psychologist = await mediator.Send(new AssignNewClientCommand(id, client.ClientId));
-        return Ok(PsychologistDetailsDto.From(psychologist));
+        try
+        {
+            var psychologist = await mediator.Send(new AssignNewClientCommand(id, client.ClientId));
+            return Ok(PsychologistDetailsDto.From(psychologist));
+        }
+        catch (System.Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     /// <summary>
