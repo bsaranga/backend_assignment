@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using System.Threading.Tasks;
 using iPractice.Api.Services;
+using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,9 +48,12 @@ app.UseRouting();
 app.UseAuthorization();
 app.MapControllers();
 
-await InitializeDatabase(app);
-
-app.Run();
+if (args.Length == 1 && args[0] == "seed") {
+    Console.WriteLine("Seeding...");
+    await InitializeDatabase(app);
+}
+else if (args.Length == 0)
+    app.Run();
 
 static async Task InitializeDatabase(IHost app)
 {

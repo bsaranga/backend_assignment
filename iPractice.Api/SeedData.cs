@@ -22,6 +22,10 @@ public class SeedData(ApplicationDbContext context)
         context.Database.ExecuteSqlRaw("DELETE FROM ClientScheduledAppointments");
         context.Database.ExecuteSqlRaw("DELETE FROM Clients");
 
+        // Reset identity columns for SQLite
+        context.Database.ExecuteSqlRaw("DELETE FROM sqlite_sequence WHERE name = 'Clients'");
+        context.Database.ExecuteSqlRaw("DELETE FROM sqlite_sequence WHERE name = 'Psychologists'");
+
         var clients = CreateClients();
         context.Clients.AddRange(clients);
         context.Psychologists.AddRange(CreatePsychologists());
