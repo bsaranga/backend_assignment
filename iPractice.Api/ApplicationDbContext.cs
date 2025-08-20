@@ -1,13 +1,47 @@
-﻿using iPractice.Api.Models.Clients;
+﻿using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using iPractice.Api.Models;
+using iPractice.Api.Models.Clients;
 using iPractice.Api.Models.Psychologists;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace iPractice.Api;
 
-public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IMediator mediator) : DbContext(options)
 {
+    private readonly IMediator _mediator = mediator;
+
     public DbSet<Psychologist> Psychologists { get; set; }
     public DbSet<Client> Clients { get; set; }
+
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var domainEntities = ChangeTracker.Entries<Entity>()
+                .Where(x => x.Entity.DomainEvents.Any())
+                .ToList();
+    
+            var domainEvents = domainEntities.SelectMany(x => x.Entity.DomainEvents).ToList();
+    
+            domainEntities.ForEach(e => e.Entity.ClearDomainEvents());
+    
+            var result = await base.SaveChangesAsync(cancellationToken);
+    
+            foreach (var domainEvent in domainEvents)
+                await _mediator.Publish(domainEvent, cancellationToken);
+    
+            return result;
+        }
+        catch (System.Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            throw;
+        }
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

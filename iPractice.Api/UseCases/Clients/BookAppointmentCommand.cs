@@ -1,6 +1,5 @@
 ﻿using iPractice.Api.Models.Clients;
 using iPractice.Api.Repositories;
-using iPractice.Api.Services;
 using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,8 +15,7 @@ public class BookAppointmentCommand(long clientId, long psychologistId, string a
 
 public class BookAppointmentHandler(
     IClientSqlRepository clientSqlRepository,
-    IPsychologistSqlRepository psychologistSqlRepository,
-    EmailService emailService) : IRequestHandler<BookAppointmentCommand, Appointment>
+    IPsychologistSqlRepository psychologistSqlRepository) : IRequestHandler<BookAppointmentCommand, Appointment>
 {
     public async Task<Appointment> Handle(BookAppointmentCommand request, CancellationToken cancellationToken)
     {
@@ -28,8 +26,6 @@ public class BookAppointmentHandler(
         var clientAppointment = client.BookAppointment(psychologistAppointment, psychologist.Id);
 
         await clientSqlRepository.SaveChangesAsync(cancellationToken);
-
-        await emailService.SendBookingConfirmationEmail(client.Name, clientAppointment.From.ToString());
 
         return clientAppointment;
     }

@@ -1,4 +1,5 @@
-﻿using iPractice.Api.UseCases;
+﻿using iPractice.Api.DomainEvents;
+using iPractice.Api.UseCases;
 using System.Collections.Generic;
 
 namespace iPractice.Api.Models.Clients;
@@ -27,7 +28,9 @@ public class Client : Entity
 
     public Appointment BookAppointment(TimeRange timeSlot, long psychologistId)
     {
-        return Calendar.BookAppointment(timeSlot, psychologistId);
+        var appointment = Calendar.BookAppointment(timeSlot, psychologistId);
+        AddDomainEvent(new AppointmentBookedEvent(appointment, Name));
+        return appointment;
     }
 
     public CancelledAppointment CancelBookedAppointment(string bookedAppointmentId) => Calendar.CancelAppointment(bookedAppointmentId);
