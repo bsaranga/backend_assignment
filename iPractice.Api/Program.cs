@@ -31,7 +31,8 @@ builder.Services.AddMediatR(cfg =>
 });
 
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
-builder.Services.AddTransient<IValidator<CreateNewAvailableTimeSlotCommand>, TimeSlotValidator>();
+builder.Services.AddTransient<IValidator<CreateNewAvailableTimeSlotCommand>, CreateTimeSlotValidator>();
+builder.Services.AddTransient<IValidator<UpdateAvailableTimeSlotCommand>, UpdateTimeSlotValidator>();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("Sqlite")));

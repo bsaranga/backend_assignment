@@ -78,7 +78,14 @@ public class PsychologistController(IMediator mediator) : ControllerBase
     public async Task<ActionResult<PsychologistDetailsDto>> UpdateNewAvailableTimeSlot([FromRoute] long id, [FromRoute] string timeSlotId,
         [FromBody] TimeSlotDto updatedTimes)
     {
-        var psychologist = await mediator.Send(new UpdateAvailableTimeSlotCommand(id, timeSlotId, updatedTimes.From, updatedTimes.To));
-        return Ok(PsychologistDetailsDto.From(psychologist));
+        try
+        {
+            var psychologist = await mediator.Send(new UpdateAvailableTimeSlotCommand(id, timeSlotId, updatedTimes.From, updatedTimes.To));
+            return Ok(PsychologistDetailsDto.From(psychologist));
+        }
+        catch (System.Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 }

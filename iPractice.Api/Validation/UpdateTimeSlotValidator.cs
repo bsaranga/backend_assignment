@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,27 +8,23 @@ using iPractice.Api.UseCases.Psychologists;
 
 namespace iPractice.Api.Validation;
 
-public class TimeSlotValidator : IValidator<CreateNewAvailableTimeSlotCommand>
+public class UpdateTimeSlotValidator : IValidator<UpdateAvailableTimeSlotCommand>
 {
     private readonly IPsychologistSqlRepository psychologistSqlRepository;
 
-    public TimeSlotValidator(IPsychologistSqlRepository psychologistSqlRepository)
+    public UpdateTimeSlotValidator(IPsychologistSqlRepository psychologistSqlRepository)
     {
         this.psychologistSqlRepository = psychologistSqlRepository;
     }
 
-    public async Task ValidateAsync(CreateNewAvailableTimeSlotCommand request, CancellationToken cancellationToken)
+    public async Task ValidateAsync(UpdateAvailableTimeSlotCommand request, CancellationToken cancellationToken)
     {
-        var incomingTimeSlot = new AvailableTimeSlot(request.From, request.To);
-        var overlappingTimeSlots = new List<AvailableTimeSlot>();
-
         var psychologist = await psychologistSqlRepository.GetPsychologistByIdAsync(request.PsychologistId, cancellationToken);
-        psychologist.Calendar.AvailableTimeSlots.ForEach(ts =>
+        var changedTimeSlot = new AvailableTimeSlot(request.From, request.To);
+
+        var overlappingTimeSlots = psychologist.Calendar.AvailableTimeSlots.Where(ts =>
         {
-            if (ts.Intersects(incomingTimeSlot))
-            {
-                overlappingTimeSlots.Add(ts);
-            }
+            return ts.Id != request.ExistingAvailableTimeSlotId && ts.Intersects(changedTimeSlot);
         });
 
         if (overlappingTimeSlots.Any())
