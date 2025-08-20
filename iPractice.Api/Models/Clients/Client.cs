@@ -21,8 +21,11 @@ public class Client : Entity
         PsychologistAssignment = psychologistAssignment;
     }
 
-    public static Client Create(string name, List<long> psychologistIds) =>
-        new(name, PsychologistAssignment.InitializeFrom(psychologistIds));
+    public static Client Create(string name, List<long> psychologistIds) {
+        Client client = new(name, PsychologistAssignment.InitializeFrom(psychologistIds));
+        client.AddDomainEvent(new RegisterClientEvent(name));
+        return client;
+    }
 
     public List<long> GetPsychologists() => PsychologistAssignment.PsychologistIds;
 

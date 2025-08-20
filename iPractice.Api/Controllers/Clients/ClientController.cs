@@ -12,25 +12,13 @@ namespace iPractice.Api.Controllers.Clients;
 
 [ApiController]
 [Route("[controller]")]
-public class ClientController(IMediator mediator, IClientSqlRepository repository, EmailService emailService) : ControllerBase
+public class ClientController(IMediator mediator, IClientSqlRepository repository) : ControllerBase
 {
 
     [HttpPost]
     public async Task<ActionResult<ClientDetailsDto>> RegisterClient([FromBody] CreateClientDto data)
     {
-        if (string.IsNullOrEmpty(data.Name) || data.Name.Length < 2)
-        {
-            return BadRequest("Name is required and must be at least 2 characters");
-        }
-
-        if (data.InitialPsychologistIds == null || data.InitialPsychologistIds.Count != 2)
-        {
-            return BadRequest("Exactly 2 psychologists must be assigned");
-        }
-
         var client = await mediator.Send(new RegisterClientCommand(data.Name, data.InitialPsychologistIds));
-
-        await emailService.SendWelcomeEmail(data.Name, "welcome@ipractice.com");
 
         return Created($"/clients/{client.Id}", ClientDetailsDto.From(client));
     }
