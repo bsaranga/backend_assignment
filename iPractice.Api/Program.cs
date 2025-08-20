@@ -9,6 +9,10 @@ using Microsoft.OpenApi.Models;
 using System.Threading.Tasks;
 using iPractice.Api.Services;
 using System;
+using iPractice.Api.PipelineBehaviors;
+using MediatR;
+using iPractice.Api.Validation;
+using iPractice.Api.UseCases.Psychologists;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +29,9 @@ builder.Services.AddMediatR(cfg =>
 {
     cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
 });
+
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+builder.Services.AddTransient<IValidator<CreateNewAvailableTimeSlotCommand>, TimeSlotValidator>();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("Sqlite")));
